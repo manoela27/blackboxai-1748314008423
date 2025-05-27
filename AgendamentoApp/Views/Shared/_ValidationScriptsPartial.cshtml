@@ -1,0 +1,60 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+    // Configuração personalizada para validação em português
+    $.extend($.validator.messages, {
+        required: "Este campo é obrigatório.",
+        remote: "Por favor, corrija este campo.",
+        email: "Por favor, forneça um endereço de email válido.",
+        url: "Por favor, forneça uma URL válida.",
+        date: "Por favor, forneça uma data válida.",
+        dateISO: "Por favor, forneça uma data válida (ISO).",
+        number: "Por favor, forneça um número válido.",
+        digits: "Por favor, forneça somente dígitos.",
+        creditcard: "Por favor, forneça um cartão de crédito válido.",
+        equalTo: "Por favor, forneça o mesmo valor novamente.",
+        maxlength: $.validator.format("Por favor, forneça não mais que {0} caracteres."),
+        minlength: $.validator.format("Por favor, forneça ao menos {0} caracteres."),
+        rangelength: $.validator.format("Por favor, forneça um valor entre {0} e {1} caracteres."),
+        range: $.validator.format("Por favor, forneça um valor entre {0} e {1}."),
+        max: $.validator.format("Por favor, forneça um valor menor ou igual a {0}."),
+        min: $.validator.format("Por favor, forneça um valor maior ou igual a {0}.")
+    });
+
+    // Adiciona método de validação personalizado para data futura
+    $.validator.addMethod("futureDate", function(value, element) {
+        if (value) {
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+            var inputDate = new Date(value);
+            return inputDate >= today;
+        }
+        return true;
+    }, "A data deve ser futura.");
+
+    // Adiciona método de validação personalizado para horário comercial
+    $.validator.addMethod("businessHours", function(value, element) {
+        if (value) {
+            var time = value.split(':');
+            var hour = parseInt(time[0]);
+            return hour >= 9 && hour < 18;
+        }
+        return true;
+    }, "O horário deve estar entre 9h e 18h.");
+
+    // Configuração para exibir mensagens de erro em português
+    $.validator.setDefaults({
+        errorElement: 'span',
+        errorClass: 'text-danger',
+        highlight: function(element) {
+            $(element).addClass('is-invalid');
+        },
+        unhighlight: function(element) {
+            $(element).removeClass('is-invalid');
+        },
+        errorPlacement: function(error, element) {
+            error.insertAfter(element);
+        }
+    });
+</script>
