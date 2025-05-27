@@ -1,0 +1,145 @@
+@model DashboardAgendamentoViewModel
+
+@{
+    ViewData["Title"] = "Dashboard do Cliente";
+}
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Meus Agendamentos</h2>
+                <a asp-action="NovoAgendamento" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Novo Agendamento
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Agendamentos Futuros</h5>
+                    @if (!Model.AgendamentosFuturos.Any())
+                    {
+                        <p class="text-muted">Nenhum agendamento futuro.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Data/Hora</th>
+                                        <th>Serviço</th>
+                                        <th>Profissional</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var agendamento in Model.AgendamentosFuturos)
+                                    {
+                                        <tr>
+                                            <td>@agendamento.DataHora.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>@agendamento.ServicoNome</td>
+                                            <td>@agendamento.FuncionarioNome</td>
+                                            <td>
+                                                <form asp-action="CancelarAgendamento" method="post" style="display: inline;">
+                                                    <input type="hidden" name="id" value="@agendamento.Id" />
+                                                    <button type="submit" class="btn btn-danger btn-sm" 
+                                                            onclick="return confirm('Tem certeza que deseja cancelar este agendamento?')">
+                                                        <i class="fas fa-times"></i> Cancelar
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Histórico de Agendamentos</h5>
+                    @if (!Model.HistoricoAgendamentos.Any())
+                    {
+                        <p class="text-muted">Nenhum agendamento no histórico.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Data/Hora</th>
+                                        <th>Serviço</th>
+                                        <th>Profissional</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var agendamento in Model.HistoricoAgendamentos)
+                                    {
+                                        <tr>
+                                            <td>@agendamento.DataHora.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>@agendamento.ServicoNome</td>
+                                            <td>@agendamento.FuncionarioNome</td>
+                                            <td>
+                                                <span class="badge bg-success">Realizado</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Resumo</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3>@Model.AgendamentosHoje</h3>
+                                <p>Agendamentos Hoje</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3>@Model.AgendamentosFuturos.Count()</h3>
+                                <p>Agendamentos Futuros</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3>@Model.TotalAgendamentos</h3>
+                                <p>Total de Agendamentos</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Adiciona classes para estilização das tabelas
+            $('table').addClass('table-hover');
+        });
+    </script>
+}
