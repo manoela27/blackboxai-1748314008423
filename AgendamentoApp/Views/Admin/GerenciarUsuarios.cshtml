@@ -1,0 +1,247 @@
+@model dynamic
+
+@{
+    ViewData["Title"] = "Gerenciar Usuários";
+}
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2>Gerenciar Usuários</h2>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs" id="userTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="clientes-tab" data-bs-toggle="tab" data-bs-target="#clientes" type="button">
+                        Clientes
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="funcionarios-tab" data-bs-toggle="tab" data-bs-target="#funcionarios" type="button">
+                        Profissionais
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content mt-3" id="userTabsContent">
+                <!-- Tab Clientes -->
+                <div class="tab-pane fade show active" id="clientes">
+                    <div class="card">
+                        <div class="card-body">
+                            @if (!Model.Clientes.Any())
+                            {
+                                <p class="text-muted text-center">Nenhum cliente cadastrado.</p>
+                            }
+                            else
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Nome</th>
+                                                <th>Email</th>
+                                                <th>Endereço</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var cliente in Model.Clientes)
+                                            {
+                                                <tr>
+                                                    <td>@cliente.Nome</td>
+                                                    <td>@cliente.Email</td>
+                                                    <td>@cliente.Endereco</td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-warning btn-sm"
+                                                                onclick="resetarSenha('Cliente', @cliente.Id)">
+                                                            <i class="fas fa-key"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-danger btn-sm"
+                                                                onclick="confirmarExclusao('Cliente', @cliente.Id, '@cliente.Nome')">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Funcionários -->
+                <div class="tab-pane fade" id="funcionarios">
+                    <div class="card">
+                        <div class="card-body">
+                            @if (!Model.Funcionarios.Any())
+                            {
+                                <p class="text-muted text-center">Nenhum profissional cadastrado.</p>
+                            }
+                            else
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Nome</th>
+                                                <th>Email</th>
+                                                <th>Serviços</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var funcionario in Model.Funcionarios)
+                                            {
+                                                <tr>
+                                                    <td>@funcionario.Nome</td>
+                                                    <td>@funcionario.Email</td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-link btn-sm"
+                                                                data-bs-toggle="tooltip"
+                                                                data-bs-placement="top"
+                                                                title="@string.Join(", ", funcionario.Servicos.Select(s => s.Nome))">
+                                                            <i class="fas fa-info-circle"></i>
+                                                            @funcionario.Servicos.Count serviços
+                                                        </button>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-warning btn-sm"
+                                                                onclick="resetarSenha('Funcionario', @funcionario.Id)">
+                                                            <i class="fas fa-key"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-danger btn-sm"
+                                                                onclick="confirmarExclusao('Funcionario', @funcionario.Id, '@funcionario.Nome')">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Resetar Senha -->
+<div class="modal fade" id="resetarSenhaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="AlterarSenhaUsuario" method="post" id="formResetarSenha">
+                <input type="hidden" id="resetTipoUsuario" name="tipo" />
+                <input type="hidden" id="resetUserId" name="userId" />
+                <div class="modal-header">
+                    <h5 class="modal-title">Resetar Senha</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="novaSenha" class="form-label">Nova Senha</label>
+                        <input type="password" class="form-control" id="novaSenha" name="novaSenha" required minlength="6" />
+                        <small class="form-text text-muted">A senha deve ter pelo menos 6 caracteres.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Confirmar Exclusão -->
+<div class="modal fade" id="confirmarExclusaoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="ExcluirUsuario" method="post" id="formExcluirUsuario">
+                <input type="hidden" id="excluirTipoUsuario" name="tipo" />
+                <input type="hidden" id="excluirUserId" name="userId" />
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir o usuário <strong id="usuarioNome"></strong>?</p>
+                    <p class="text-danger">Esta ação não pode ser desfeita.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Inicializa tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+        });
+
+        function resetarSenha(tipo, id) {
+            $("#resetTipoUsuario").val(tipo);
+            $("#resetUserId").val(id);
+            $("#novaSenha").val("");
+            $("#resetarSenhaModal").modal("show");
+        }
+
+        function confirmarExclusao(tipo, id, nome) {
+            $("#excluirTipoUsuario").val(tipo);
+            $("#excluirUserId").val(id);
+            $("#usuarioNome").text(nome);
+            $("#confirmarExclusaoModal").modal("show");
+        }
+
+        // Handler para respostas AJAX
+        function handleAjaxResponse(response, modal) {
+            if (response.success) {
+                location.reload();
+            } else {
+                alert(response.message || "Ocorreu um erro. Tente novamente.");
+                $(modal).modal("hide");
+            }
+        }
+
+        // Submit do form de resetar senha via AJAX
+        $("#formResetarSenha").on("submit", function (e) {
+            e.preventDefault();
+            $.post($(this).attr("action"), $(this).serialize())
+                .done(function (response) {
+                    handleAjaxResponse(response, "#resetarSenhaModal");
+                })
+                .fail(function () {
+                    alert("Erro ao processar a requisição.");
+                    $("#resetarSenhaModal").modal("hide");
+                });
+        });
+
+        // Submit do form de excluir usuário via AJAX
+        $("#formExcluirUsuario").on("submit", function (e) {
+            e.preventDefault();
+            $.post($(this).attr("action"), $(this).serialize())
+                .done(function (response) {
+                    handleAjaxResponse(response, "#confirmarExclusaoModal");
+                })
+                .fail(function () {
+                    alert("Erro ao processar a requisição.");
+                    $("#confirmarExclusaoModal").modal("hide");
+                });
+        });
+    </script>
+}
