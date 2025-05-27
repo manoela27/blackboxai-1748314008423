@@ -1,0 +1,204 @@
+@model ServicoManagementViewModel
+
+@{
+    ViewData["Title"] = "Gerenciar Serviços";
+}
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Gerenciar Serviços</h2>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#novoServicoModal">
+                    <i class="fas fa-plus"></i> Novo Serviço
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    @if (!Model.Servicos.Any())
+                    {
+                        <p class="text-muted text-center">Nenhum serviço cadastrado.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Descrição</th>
+                                        <th>Profissionais</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var servico in Model.Servicos)
+                                    {
+                                        <tr>
+                                            <td>@servico.Nome</td>
+                                            <td>@servico.Descricao</td>
+                                            <td>
+                                                <span class="badge bg-info">@servico.QuantidadeFuncionarios profissionais</span>
+                                                <button type="button" class="btn btn-link btn-sm" 
+                                                        data-bs-toggle="tooltip" 
+                                                        data-bs-placement="top" 
+                                                        title="@string.Join(", ", servico.NomesFuncionarios)">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </button>
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-primary btn-sm" 
+                                                        onclick="editarServico(@servico.Id)">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-danger btn-sm" 
+                                                        onclick="confirmarExclusao(@servico.Id, '@servico.Nome')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Novo Serviço -->
+<div class="modal fade" id="novoServicoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="AdicionarServico" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">Novo Serviço</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label asp-for="NovoServico.Nome" class="form-label">Nome</label>
+                        <input asp-for="NovoServico.Nome" class="form-control" required />
+                        <span asp-validation-for="NovoServico.Nome" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="NovoServico.Descricao" class="form-label">Descrição</label>
+                        <textarea asp-for="NovoServico.Descricao" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="NovoServico.Descricao" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="NovoServico.FuncionarioIds" class="form-label">Profissionais</label>
+                        <select asp-for="NovoServico.FuncionarioIds" 
+                                asp-items="Model.NovoServico.Funcionarios" 
+                                class="form-select" 
+                                multiple>
+                        </select>
+                        <small class="form-text text-muted">Pressione Ctrl para selecionar múltiplos profissionais.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Serviço -->
+<div class="modal fade" id="editarServicoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="EditarServico" method="post" id="formEditarServico">
+                <input type="hidden" id="editId" name="Id" />
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Serviço</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="editNome" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="editNome" name="Nome" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="editDescricao" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="editDescricao" name="Descricao" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editFuncionarioIds" class="form-label">Profissionais</label>
+                        <select id="editFuncionarioIds" name="FuncionarioIds" 
+                                asp-items="Model.NovoServico.Funcionarios" 
+                                class="form-select" 
+                                multiple>
+                        </select>
+                        <small class="form-text text-muted">Pressione Ctrl para selecionar múltiplos profissionais.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Confirmar Exclusão -->
+<div class="modal fade" id="confirmarExclusaoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="ExcluirServico" method="post" id="formExcluirServico">
+                <input type="hidden" id="excluirId" name="id" />
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir o serviço <strong id="servicoNome"></strong>?</p>
+                    <p class="text-danger">Esta ação não pode ser desfeita.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function () {
+            // Inicializa tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+        });
+
+        function editarServico(id) {
+            $.getJSON(`/Admin/GetServicoDetails/${id}`, function (data) {
+                $("#editId").val(data.id);
+                $("#editNome").val(data.nome);
+                $("#editDescricao").val(data.descricao);
+                $("#editFuncionarioIds").val(data.funcionarioIds);
+                $("#editarServicoModal").modal("show");
+            });
+        }
+
+        function confirmarExclusao(id, nome) {
+            $("#excluirId").val(id);
+            $("#servicoNome").text(nome);
+            $("#confirmarExclusaoModal").modal("show");
+        }
+    </script>
+}
