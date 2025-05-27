@@ -1,0 +1,136 @@
+@model AgendamentoViewModel
+
+@{
+    ViewData["Title"] = "Novo Agendamento";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">Novo Agendamento</h2>
+
+                    <form asp-action="NovoAgendamento" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Data" class="form-label"></label>
+                                    <input asp-for="Data" class="form-control" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                                    <span asp-validation-for="Data" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Hora" class="form-label"></label>
+                                    <input asp-for="Hora" class="form-control" type="time" min="09:00" max="18:00" />
+                                    <span asp-validation-for="Hora" class="text-danger"></span>
+                                    <small class="form-text text-muted">Horário de atendimento: 09:00 às 18:00</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ServicoId" class="form-label">Serviço</label>
+                            <select asp-for="ServicoId" asp-items="Model.Servicos" class="form-select" id="servicoSelect">
+                                <option value="">Selecione um serviço</option>
+                            </select>
+                            <span asp-validation-for="ServicoId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="FuncionarioId" class="form-label">Profissional</label>
+                            <select asp-for="FuncionarioId" class="form-select" id="funcionarioSelect" disabled>
+                                <option value="">Selecione primeiro um serviço</option>
+                            </select>
+                            <span asp-validation-for="FuncionarioId" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Agendar</button>
+                            <a asp-action="Dashboard" class="btn btn-secondary">Voltar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function () {
+            function carregarFuncionarios() {
+                var servicoId = $("#servicoSelect").val();
+                var data = $("#Data").val();
+                var hora = $("#Hora").val();
+                
+                if (servicoId && data && hora) {
+                    var dataHora = data + "T" + hora;
+                    
+                    $.getJSON("/Cliente/GetFuncionarios", { 
+                        servicoId: servicoId, 
+                        dataHora: dataHora 
+                    })
+                    .done(function (funcionarios) {
+                        var select = $("#funcionarioSelect");
+                        select.empty();
+                        select.append($("<option></option>")
+                            .attr("value", "")
+                            .text("Selecione um profissional"));
+                            
+                        $.each(funcionarios, function (index, item) {
+                            select.append($("<option></option>")
+                                .attr("value", item.id)
+                                .text(item.nome));
+                        });
+                        
+                        select.prop("disabled", false);
+                    })
+                    .fail(function () {
+                        alert("Erro ao carregar profissionais disponíveis.");
+                    });
+                } else {
+                    $("#funcionarioSelect")
+                        .empty()
+                        .append($("<option></option>")
+                            .attr("value", "")
+                            .text("Selecione primeiro um serviço e horário"))
+                        .prop("disabled", true);
+                }
+            }
+
+            $("#servicoSelect, #Data, #Hora").change(carregarFuncionarios);
+
+            // Validação de horário comercial
+            $("#Hora").change(function() {
+                var hora = $(this).val();
+                if (hora) {
+                    var horario = hora.split(":");
+                    var hours = parseInt(horario[0]);
+                    
+                    if (hours < 9 || hours >= 18) {
+                        alert("Por favor, selecione um horário entre 9h e 18h.");
+                        $(this).val("");
+                    }
+                }
+            });
+
+            // Validação de data
+            $("#Data").change(function() {
+                var data = new Date($(this).val());
+                var hoje = new Date();
+                hoje.setHours(0,0,0,0);
+                
+                if (data < hoje) {
+                    alert("Por favor, selecione uma data futura.");
+                    $(this).val("");
+                }
+            });
+        });
+    </script>
+}
