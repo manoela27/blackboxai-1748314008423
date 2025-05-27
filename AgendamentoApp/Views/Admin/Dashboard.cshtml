@@ -1,0 +1,149 @@
+@model Dictionary<string, int>
+
+@{
+    ViewData["Title"] = "Dashboard do Administrador";
+}
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2>Painel de Controle</h2>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Total de Clientes</h6>
+                            <h2 class="mb-0">@Model["TotalClientes"]</h2>
+                        </div>
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                    <div class="mt-3">
+                        <a asp-action="GerenciarUsuarios" class="text-white">
+                            Ver detalhes <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Total de Funcionários</h6>
+                            <h2 class="mb-0">@Model["TotalFuncionarios"]</h2>
+                        </div>
+                        <i class="fas fa-user-tie fa-2x"></i>
+                    </div>
+                    <div class="mt-3">
+                        <a asp-action="GerenciarUsuarios" class="text-white">
+                            Ver detalhes <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Total de Serviços</h6>
+                            <h2 class="mb-0">@Model["TotalServicos"]</h2>
+                        </div>
+                        <i class="fas fa-clipboard-list fa-2x"></i>
+                    </div>
+                    <div class="mt-3">
+                        <a asp-action="GerenciarServicos" class="text-white">
+                            Ver detalhes <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Agendamentos de Hoje</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">@Model["AgendamentosHoje"]</h3>
+                        <i class="fas fa-calendar-day fa-2x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Agendamentos Futuros</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">@Model["AgendamentosFuturos"]</h3>
+                        <i class="fas fa-calendar-alt fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Ações Rápidas</h5>
+                    <div class="d-grid gap-2">
+                        <a asp-action="GerenciarUsuarios" class="btn btn-outline-primary">
+                            <i class="fas fa-users"></i> Gerenciar Usuários
+                        </a>
+                        <a asp-action="GerenciarServicos" class="btn btn-outline-success">
+                            <i class="fas fa-clipboard-list"></i> Gerenciar Serviços
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Informações do Sistema</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Versão do Sistema
+                            <span class="badge bg-primary">1.0.0</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Último Backup
+                            <span class="badge bg-info">@DateTime.Now.ToString("dd/MM/yyyy")</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Status do Sistema
+                            <span class="badge bg-success">Online</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Atualiza a página a cada 5 minutos
+            setTimeout(function() {
+                location.reload();
+            }, 300000);
+        });
+    </script>
+}
